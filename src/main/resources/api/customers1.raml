@@ -1,0 +1,61 @@
+#%RAML 1.0
+title: customers1
+baseUri: 
+
+
+/customers:
+  get:
+    queryParameters:
+      customerNumber:
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "customerNumber": 234,
+                
+              }
+  post:
+    body:
+      application/json:
+        example:
+          {
+            "customerNumber": 234
+          }   
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              {
+                "customerdetial": "inserted"
+              }  
+
+  delete:
+    queryParameters:
+      customerNumber:
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "customer": "deleted succefully"
+              }          
+
+  put:
+    body:
+      application/json:
+        example:
+          {
+            "customerNumber": 123
+          }         
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "cstomer": "deleted succesfully"
+              }                            
