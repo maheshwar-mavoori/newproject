@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="f65c190b-ffeb-4c0a-8a0f-b8929b45eac9" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="9391553068mm@" database="classicmodels" />
+	</db:config>
+	<sub-flow name="get" doc:id="4c171fb3-d335-45d0-9c54-7e8231356da6" >
+		<set-variable value="#[attributes.queryParams.customerNumber]" doc:name="Set Variable" doc:id="2086204d-65a1-4d6e-9b72-afffb822ea82" variableName="customernumber"/>
+		<db:select doc:id="a2fc9a39-ed13-4dcc-aa79-76226fb80a4b" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from classicmodels.customers where customerNumber = :customernumber]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"customernumber": vars.customernumber
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="25312542-c7a6-46cd-98e0-c9cbcbe644f2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="del" doc:id="c3971579-ff36-4ca6-80da-62d7bebf2ac2" >
+		<set-variable value="#[attributes.queryParams.customerNumber]" doc:name="Set Variable" doc:id="57d36350-f3e0-438c-801f-7f6f7f28889e" variableName="customernumber"/>
+		<db:delete doc:name="Delete" doc:id="f053eb33-d1a7-4b0e-81d6-90dfc69d988e" config-ref="Database_Config">
+			<db:sql ><![CDATA[delete from classicmodels.customers where customerNumber = :customernumber]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"customernumber": vars.customernumber
+}]]]></db:input-parameters>
+		</db:delete>
+	</sub-flow>
+	<sub-flow name="post" doc:id="96dde17e-2bb6-4089-8a7a-a1124aa306ef" >
+		<ee:transform doc:name="Transform Message" doc:id="794556cf-c370-4ec7-9c7a-f1ddad39125c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map {
+	
+	customerNumber: $.customerNumber,
+	customerName: $.customerName,
+	contactLastName: $.contactLastName,
+	contactFirstName: $.contactFirstName,
+	phone: $.phone,
+	addressLine1: $.addressLine1,
+	addressLine2: $.addressLine2,
+	city: $.city,
+	state :$.state,
+	postalCode: $.postalCode,
+	country: $.country
+	
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="5bef8da8-1e0e-4fdd-9f6d-9f7e4474aa8a" >
+			<db:insert doc:name="Insert" doc:id="1e5936e2-1c85-4ad7-9e20-4cbb127973c2" config-ref="Database_Config">
+				<db:sql ><![CDATA[insert into classicmodels.customers(customerNumber,customerName,contactLastName,contactFirstName,phone,addressLine1,addressLine2,city,state,postalCode,country) values(:customernumber,:customername,:contactlast,:contactfirst,:phone,:addressLine1,:addressLine2,:city,:state,:postalCode,:country)]]></db:sql>
+				<db:input-parameters ><![CDATA[#[{
+	customernumber: payload.customerNumber,
+	customername: payload.customerName,
+	contactlast: payload.contactLastName,
+	contactfirst: payload.contactFirstName,
+	phone: payload.phone,
+	addressLine1: payload.addressLine1,
+	addressLine2: payload.addressLine2,
+	city: payload.city,
+	state :payload.state,
+	postalCode: payload.postalCode,
+	country: payload.country
+	
+	
+	
+}]]]></db:input-parameters>
+			</db:insert>
+		</foreach>
+	</sub-flow>
+</mule>
